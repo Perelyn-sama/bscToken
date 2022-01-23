@@ -624,7 +624,7 @@ contract MondayToken is Context, IERC20, Ownable {
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeDev(tDev);
-        _takeFundOrBurn(sender, recipient, tFundOrBurn);
+        // _takeFundOrBurn(sender, recipient, tFundOrBurn);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
