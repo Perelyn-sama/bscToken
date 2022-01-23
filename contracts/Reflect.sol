@@ -24,7 +24,7 @@ pragma solidity 0.8.4;
 import './Imports.sol';
 
 
-contract MondayToken is Context, IERC20, Ownable {
+contract ETERNITY is Context, IERC20, Ownable {
     using SafeMath for uint256;
     using Address for address;
 
@@ -64,9 +64,6 @@ contract MondayToken is Context, IERC20, Ownable {
     // TODO SPLIT 
     uint256 public _taxFee = 3;
     uint256 private _previousTaxFee = _taxFee;
-
-    // uint256 public _fundOrBurnFee = 5;
-    // uint256 private _previousFundOrBurnFee = _fundOrBurnFee;
     
     // TODO SPLIT BUY AND SELL THEN CHANGE NAME TO MARKETING LATER
     uint256 public _devFee = 5;
@@ -110,7 +107,8 @@ contract MondayToken is Context, IERC20, Ownable {
     struct Fees {
         uint256 tTransferAmount;
         uint256 tFee;
-        uint256 tFundOrBurn;
+        uint256 tDonation;
+        // uint256 tDonation;
         uint256 tDev;
         uint256 tLiquidity;
     }
@@ -255,14 +253,14 @@ contract MondayToken is Context, IERC20, Ownable {
     }
     
     function _transferBothExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tFundOrBurn) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tDonation) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
-        // _takeFundOrBurn(sender, recipient, tFundOrBurn);
+        _takeDonation(tDonation);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
@@ -280,7 +278,7 @@ contract MondayToken is Context, IERC20, Ownable {
     }
 
     function setDonationFeePercent(uint256 donationFee) external onlyOwner {
-        _donationFee = _donationFee;
+        _donationFee = donationFee;
     }
     
     function setDevFeePercent(uint256 devFee) external onlyOwner {
@@ -318,8 +316,8 @@ contract MondayToken is Context, IERC20, Ownable {
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
         (Fees memory fees) = _getTValues(tAmount);
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, fees.tFee, fees.tDev, fees.tLiquidity, fees.tFundOrBurn, _getRate());
-        return (rAmount, rTransferAmount, rFee, fees.tTransferAmount, fees.tFee, fees.tDev, fees.tLiquidity, fees.tFundOrBurn);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee) = _getRValues(tAmount, fees.tFee, fees.tDev, fees.tLiquidity, fees.tDonation, _getRate());
+        return (rAmount, rTransferAmount, rFee, fees.tTransferAmount, fees.tFee, fees.tDev, fees.tLiquidity, fees.tDonation);
     }
 
     function _getTValues(uint256 tAmount) private view returns (Fees memory) {
@@ -328,17 +326,17 @@ contract MondayToken is Context, IERC20, Ownable {
         fees.tFee = calculateTaxFee(tAmount);
         fees.tDev = calculateDevFee(tAmount);
         fees.tLiquidity = calculateLiquidityFee(tAmount);
-        fees.tFundOrBurn = calculateFundOrBurnFee(tAmount);
-        fees.tTransferAmount = tAmount.sub(fees.tFee).sub(fees.tDev).sub(fees.tLiquidity).sub(fees.tFundOrBurn);
+        fees.tDonation = calculateFundOrBurnFee(tAmount);
+        fees.tTransferAmount = tAmount.sub(fees.tFee).sub(fees.tDev).sub(fees.tLiquidity).sub(fees.tDonation);
         return (fees);
     }
 
-    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tFundOrBurn, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
+    function _getRValues(uint256 tAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tDonation, uint256 currentRate) private pure returns (uint256, uint256, uint256) {
         uint256 rAmount = tAmount.mul(currentRate);
         uint256 rFee = tFee.mul(currentRate);
         uint256 rDev = tDev.mul(currentRate);
         uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 rFundOrBurn = tFundOrBurn.mul(currentRate);
+        uint256 rFundOrBurn = tDonation.mul(currentRate);
         uint256 rTransferAmount = rAmount.sub(rFee).sub(rDev).sub(rLiquidity).sub(rFundOrBurn);
         return (rAmount, rTransferAmount, rFee);
     }
@@ -367,20 +365,6 @@ contract MondayToken is Context, IERC20, Ownable {
         if(_isExcluded[address(this)])
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
-
-    // function _takeFundOrBurn(address sender, address recipient, uint256 tFundOrBurn) private {
-    //     uint256 currentRate =  _getRate();
-    //     uint256 rFundOrBurn = tFundOrBurn.mul(currentRate);
-        
-    //     if (sender.isContract() != true && recipient.isContract() != true) {
-    //         _tTotal = _tTotal - tFundOrBurn;
-    //         _rTotal = _rTotal - rFundOrBurn;
-    //     } else {
-    //         _rOwned[_donationWalletAddress] = _rOwned[_donationWalletAddress].add(rFundOrBurn);
-    //         if(_isExcluded[_donationWalletAddress])
-    //             _tOwned[_donationWalletAddress] = _tOwned[_donationWalletAddress].add(tFundOrBurn);
-    //         }
-    // }
     
     function _takeDev(address sender, address recipient, uint256 tDev) private {
         uint256 currentRate =  _getRate();
@@ -398,12 +382,12 @@ contract MondayToken is Context, IERC20, Ownable {
 
     }
 
-    function _takeDonation(uint256 tDev) private {
+    function _takeDonation(uint256 tDonation) private {
         uint256 currentRate =  _getRate();
-        uint256 rDev = tDev.mul(currentRate);
-        _rOwned[_donationAddress] = _rOwned[_donationAddress].add(rDev);
+        uint256 rDonation = tDonation.mul(currentRate);
+        _rOwned[_donationAddress] = _rOwned[_donationAddress].add(rDonation);
         if(_isExcluded[_donationAddress])
-            _tOwned[_donationAddress] = _tOwned[_donationAddress].add(tDev);
+            _tOwned[_donationAddress] = _tOwned[_donationAddress].add(tDonation);
     }
     
     function TransferBnbToExternalAddress(address recipient, uint256 amount) private {
@@ -418,7 +402,7 @@ contract MondayToken is Context, IERC20, Ownable {
         return _amount.mul(_devFee).div(10**2);
     }
     function calculateFundOrBurnFee(uint256 _amount) private view returns (uint256) {
-        return _amount.mul(_fundOrBurnFee).div(10**2);
+        return _amount.mul(_donationFee).div(10**2);
     }
 
     function calculateLiquidityFee(uint256 _amount) private view returns (uint256) {
@@ -430,19 +414,19 @@ contract MondayToken is Context, IERC20, Ownable {
 
         _previousTaxFee = _taxFee;
         _previousDevFee = _devFee;
-        _previousFundOrBurnFee = _fundOrBurnFee;
+        _previousDonationFee = _donationFee;
         _previousLiquidityFee = _liquidityFee;
 
         _taxFee = 0;
         _devFee = 0;
-        _fundOrBurnFee = 0;
+        _donationFee = 0;
         _liquidityFee = 0;
     }
 
     function restoreAllFee() private {
         _taxFee = _previousTaxFee;
         _devFee = _previousDevFee;
-        _fundOrBurnFee = _previousFundOrBurnFee;
+        _donationFee = _previousDonationFee;
         _liquidityFee = _previousLiquidityFee;
     }
 
@@ -595,36 +579,36 @@ contract MondayToken is Context, IERC20, Ownable {
     }
 
     function _transferStandard(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tFundOrBurn) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tDonation) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
-        // _takeFundOrBurn(sender, recipient, tFundOrBurn);
+        _takeDonation(tDonation);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferToExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tFundOrBurn) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tDonation) = _getValues(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _tOwned[recipient] = _tOwned[recipient].add(tTransferAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
-        // _takeFundOrBurn(sender, recipient, tFundOrBurn);
+        _takeDonation(tDonation);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
     function _transferFromExcluded(address sender, address recipient, uint256 tAmount) private {
-        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tFundOrBurn) = _getValues(tAmount);
+        (uint256 rAmount, uint256 rTransferAmount, uint256 rFee, uint256 tTransferAmount, uint256 tFee, uint256 tDev, uint256 tLiquidity, uint256 tDonation) = _getValues(tAmount);
         _tOwned[sender] = _tOwned[sender].sub(tAmount);
         _rOwned[sender] = _rOwned[sender].sub(rAmount);
         _rOwned[recipient] = _rOwned[recipient].add(rTransferAmount);
         _takeLiquidity(tLiquidity);
-        _takeDev(tDev);
-        // _takeFundOrBurn(sender, recipient, tFundOrBurn);
+        _takeDev(sender, recipient, tDev);
+        _takeDonation(tDonation);
         _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
