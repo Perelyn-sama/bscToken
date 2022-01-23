@@ -323,7 +323,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         fees.tFee = calculateTaxFee(tAmount);
         fees.tDev = calculateDevFee(tAmount);
         fees.tLiquidity = calculateLiquidityFee(tAmount);
-        fees.tDonation = calculateFundOrBurnFee(tAmount);
+        fees.tDonation = calculateDonation(tAmount);
         fees.tTransferAmount = tAmount.sub(fees.tFee).sub(fees.tDev).sub(fees.tLiquidity).sub(fees.tDonation);
         return (fees);
     }
@@ -333,8 +333,8 @@ contract ETERNITY is Context, IERC20, Ownable {
         uint256 rFee = tFee.mul(currentRate);
         uint256 rDev = tDev.mul(currentRate);
         uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 rFundOrBurn = tDonation.mul(currentRate);
-        uint256 rTransferAmount = rAmount.sub(rFee).sub(rDev).sub(rLiquidity).sub(rFundOrBurn);
+        uint256 rDonation = tDonation.mul(currentRate);
+        uint256 rTransferAmount = rAmount.sub(rFee).sub(rDev).sub(rLiquidity).sub(rDonation);
         return (rAmount, rTransferAmount, rFee);
     }
 
@@ -398,7 +398,7 @@ contract ETERNITY is Context, IERC20, Ownable {
     function calculateDevFee(uint256 _amount) private view returns (uint256) {
         return _amount.mul(_devFee).div(10**2);
     }
-    function calculateFundOrBurnFee(uint256 _amount) private view returns (uint256) {
+    function calculateDonation(uint256 _amount) private view returns (uint256) {
         return _amount.mul(_donationFee).div(10**2);
     }
 
