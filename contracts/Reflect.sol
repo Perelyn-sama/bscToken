@@ -46,7 +46,7 @@ contract ETERNITY is Context, IERC20, Ownable {
     address private _donationAddress = 0x0f60Bc4b412DD13893Ecc273f079D2ACD6940703;
 
     // nft tuts
-    address private _marketingAddress = 0x5a61965ffAD00C0c46348Ae54dFaC68E6E5DCc1c;
+    // address private _marketingAddress = 0x5a61965ffAD00C0c46348Ae54dFaC68E6E5DCc1c;
 
     // games 
     address private _devAddress = 0x6129ED1E9D4237e714586a0B8484CC373658d17d;
@@ -128,8 +128,8 @@ contract ETERNITY is Context, IERC20, Ownable {
         uniswapV2Router = _uniswapV2Router;
 
         //exclude owner and this contract from fee
-        // _isExcludedFromFee[owner()] = true;
-        // _isExcludedFromFee[address(this)] = true;
+        _isExcludedFromFee[owner()] = true;
+        _isExcludedFromFee[address(this)] = true;
         // _isExcludedFromFee[_mondayInvestmentFund] = true;
         // _isExcludedFromFee[_donationWalletAddress] = true;
         // _isExcludedFromFee[_mondayArGameWalletAddress] = true;
@@ -137,10 +137,7 @@ contract ETERNITY is Context, IERC20, Ownable {
 
         // My test addresses 
         _isExcludedFromFee[_donationAddress] = true;
-        _isExcludedFromFee[_marketingAddress] = true;
         _isExcludedFromFee[_devAddress] = true;
-
-
 
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
