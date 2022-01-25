@@ -1,22 +1,3 @@
-// SPDX-License-Identifier: GPL-3.0 or later
-// If pair is reciever that's a buy, if pair is sender that's a sell
-
-/** 
-    # MONDAY
-    Great features:
-    2% fee automatically add to the liquidity pool to lock forever when selling
-    3% fee automatically distribute to all holders
-    5% fee automatically move to Monday Investment fund
-    
-    When sell token:
-    5% fee auto burn
-    
-    When buy token:
-    5% fee automatically move to donation wallet.
-    
-    Official site: https://monday.land
- */
-
 // SPDX-License-Identifier: MIT
 // pragma solidity >=0.4.0 <0.9.0;
 pragma solidity 0.8.4;
@@ -37,16 +18,11 @@ contract ETERNITY is Context, IERC20, Ownable {
     mapping (address => bool) private _isExcluded;
     address[] private _excluded;
 
-    // address private _mondayInvestmentFund = 0x91DfAb5Ef444d0A0AAe7D4105371A751faE7dba8;
-    // address private _donationWalletAddress = 0x785Db213D3Ec54F03F9b8f1a9B1a60E675CDfF49;
-    // address private _mondayArGameWalletAddress = 0x4651098d2C30A951FD42889a77c03726E78C55bb;
-    // address private _serviceWalletAddress = 0x4Eb5299444F227AD12472224535A51daA4CD38CF;
-
     // Kovan
     address private _donationAddress = 0x0f60Bc4b412DD13893Ecc273f079D2ACD6940703;
 
     // nft tuts
-    // address private _marketingAddress = 0x5a61965ffAD00C0c46348Ae54dFaC68E6E5DCc1c;
+    address private _marketingAddress = 0x5a61965ffAD00C0c46348Ae54dFaC68E6E5DCc1c;
 
     // games 
     address private _devAddress = 0x6129ED1E9D4237e714586a0B8484CC373658d17d;
@@ -57,8 +33,9 @@ contract ETERNITY is Context, IERC20, Ownable {
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
-    string private _name = "7ETERNITY";
-    string private _symbol = "7ET";
+    // string private _name = "7ETERNITY";
+    string private _name = "GODABEG2";
+    string private _symbol = "GAG2";
     uint8 private _decimals = 18;
 
     // TODO SPLIT 
@@ -137,7 +114,10 @@ contract ETERNITY is Context, IERC20, Ownable {
 
         // My test addresses 
         _isExcludedFromFee[_donationAddress] = true;
+        _isExcludedFromFee[_marketingAddress] = true;
         _isExcludedFromFee[_devAddress] = true;
+
+
 
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
@@ -323,7 +303,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         fees.tFee = calculateTaxFee(tAmount);
         fees.tDev = calculateDevFee(tAmount);
         fees.tLiquidity = calculateLiquidityFee(tAmount);
-        fees.tDonation = calculateDonation(tAmount);
+        fees.tDonation = calculateFundOrBurnFee(tAmount);
         fees.tTransferAmount = tAmount.sub(fees.tFee).sub(fees.tDev).sub(fees.tLiquidity).sub(fees.tDonation);
         return (fees);
     }
@@ -333,8 +313,8 @@ contract ETERNITY is Context, IERC20, Ownable {
         uint256 rFee = tFee.mul(currentRate);
         uint256 rDev = tDev.mul(currentRate);
         uint256 rLiquidity = tLiquidity.mul(currentRate);
-        uint256 rDonation = tDonation.mul(currentRate);
-        uint256 rTransferAmount = rAmount.sub(rFee).sub(rDev).sub(rLiquidity).sub(rDonation);
+        uint256 rFundOrBurn = tDonation.mul(currentRate);
+        uint256 rTransferAmount = rAmount.sub(rFee).sub(rDev).sub(rLiquidity).sub(rFundOrBurn);
         return (rAmount, rTransferAmount, rFee);
     }
 
@@ -362,7 +342,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         if(_isExcluded[address(this)])
             _tOwned[address(this)] = _tOwned[address(this)].add(tLiquidity);
     }
-    
+   
     function _takeDev(address sender, address recipient, uint256 tDev) private {
         uint256 currentRate =  _getRate();
         uint256 rDev = tDev.mul(currentRate);
@@ -372,9 +352,9 @@ contract ETERNITY is Context, IERC20, Ownable {
              _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev);
 
         } else {
-            _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev);
+            _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev.mul(40).div(10**2));
             if(_isExcluded[_devAddress])
-            _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev);
+            _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev.mul(40).div(10**2));
         }
 
     }
@@ -398,7 +378,7 @@ contract ETERNITY is Context, IERC20, Ownable {
     function calculateDevFee(uint256 _amount) private view returns (uint256) {
         return _amount.mul(_devFee).div(10**2);
     }
-    function calculateDonation(uint256 _amount) private view returns (uint256) {
+    function calculateFundOrBurnFee(uint256 _amount) private view returns (uint256) {
         return _amount.mul(_donationFee).div(10**2);
     }
 
