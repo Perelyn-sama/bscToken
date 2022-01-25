@@ -782,27 +782,29 @@ contract ETERNITY is Context, IERC20, Ownable {
     address[] private _excluded;
 
     // Kovan
-    address private _donationAddress = 0x0f60Bc4b412DD13893Ecc273f079D2ACD6940703;
+    address private _donationAddress = 0x9971ADCeD5BB27Bce40f5A31e36D203a436cEA39;
 
     // games 
-    address private _devAddress = 0x6129ED1E9D4237e714586a0B8484CC373658d17d;
+    address private _devAddress = 0x32B5b788Bc213d5D23D18817e0a797D810236310;
     
 
     uint256 private constant MAX = ~uint256(0);
-    uint256 private _tTotal = 1 * 10**12 * 10**18;
+    uint256 private _tTotal = 1.000 * 10**12 * 10**18;
     uint256 private _rTotal = (MAX - (MAX % _tTotal));
     uint256 private _tFeeTotal;
 
     // string private _name = "7ETERNITY";
-    string private _name = "GODABEG3";
-    string private _symbol = "GAG3";
+    string private _name = "GODABEG8";
+    string private _symbol = "GAG8";
     uint8 private _decimals = 18;
 
     // TODO SPLIT 
     uint256 public _taxFee = 3;
     uint256 private _previousTaxFee = _taxFee;
-    uint256 private _buyTaxFee = 5; // set buy fee
-    uint256 private _sellTaxFee = 15; // set sell fee
+    uint256 private _buyTaxFee = 2; // set buy fee
+    uint256 private _sellTaxFee = 3; // set sell fee
+    uint256 private _buyDevFee = 3; // set buy fee
+    uint256 private _sellDevFee = 5; // set sell fee
     
     // TODO SPLIT BUY AND SELL THEN CHANGE NAME TO MARKETING LATER
     uint256 public _devFee = 5;
@@ -1237,9 +1239,11 @@ contract ETERNITY is Context, IERC20, Ownable {
         bool buyOrSell = false;
         if(from == uniswapV2Pair){
             _taxFee = _sellTaxFee;
+            _devFee = _sellDevFee;
             buyOrSell = true;
         } else if(from == uniswapV2Pair){
             _taxFee = _buyTaxFee;
+            _devFee = _buyDevFee;
             buyOrSell = true;
         }
 
