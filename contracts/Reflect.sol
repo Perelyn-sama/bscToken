@@ -21,9 +21,6 @@ contract ETERNITY is Context, IERC20, Ownable {
     // Kovan
     address private _donationAddress = 0x0f60Bc4b412DD13893Ecc273f079D2ACD6940703;
 
-    // nft tuts
-    address private _marketingAddress = 0x5a61965ffAD00C0c46348Ae54dFaC68E6E5DCc1c;
-
     // games 
     address private _devAddress = 0x6129ED1E9D4237e714586a0B8484CC373658d17d;
     
@@ -104,19 +101,12 @@ contract ETERNITY is Context, IERC20, Ownable {
         uniswapV2Router = _uniswapV2Router;
 
         //exclude owner and this contract from fee
-        _isExcludedFromFee[owner()] = true;
-        _isExcludedFromFee[address(this)] = true;
-        // _isExcludedFromFee[_mondayInvestmentFund] = true;
-        // _isExcludedFromFee[_donationWalletAddress] = true;
-        // _isExcludedFromFee[_mondayArGameWalletAddress] = true;
-        // _isExcludedFromFee[_serviceWalletAddress] = true;
+        // _isExcludedFromFee[owner()] = true;
+        // _isExcludedFromFee[address(this)] = true;
 
         // My test addresses 
         _isExcludedFromFee[_donationAddress] = true;
-        _isExcludedFromFee[_marketingAddress] = true;
         _isExcludedFromFee[_devAddress] = true;
-
-
 
         emit Transfer(address(0), _msgSender(), _tTotal);
     }
@@ -237,7 +227,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(sender, recipient ,rFee, tFee);
+        _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -285,17 +275,10 @@ contract ETERNITY is Context, IERC20, Ownable {
     // to recieve ETH from uniswapV2Router when swaping
     receive() external payable {}
 
-    function _reflectFee(address sender, address recipient, uint256 rFee, uint256 tFee) private {
-        
-        // sell condition
-         if (sender.isContract() != true && recipient.isContract() != true) {
-            _rTotal = _rTotal.sub(rFee);
-            _tFeeTotal = _tFeeTotal.add(tFee);
+    function _reflectFee(uint256 rFee, uint256 tFee) private {
 
-        } else {
-            _rTotal = _rTotal.sub(rFee.mul(66).div(10 ** 2));
-            _tFeeTotal = _tFeeTotal.add(tFee.mul(66).div(10 ** 2));
-        }
+        _rTotal = _rTotal.sub(rFee);
+        _tFeeTotal = _tFeeTotal.add(tFee);
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
@@ -355,10 +338,12 @@ contract ETERNITY is Context, IERC20, Ownable {
         uint256 rDev = tDev.mul(currentRate);
 
         // sell condition
-         if (sender.isContract() != true && recipient.isContract() != true) {
+         if (sender == uniswapV2Pair ) {
              _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev);
+            if(_isExcluded[_devAddress])
+            _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev);
 
-        } else {
+        } else if(recipient == uniswapV2Pair) {
             _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev.mul(60).div(10**2));
             if(_isExcluded[_devAddress])
             _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev.mul(60).div(10**2));
@@ -569,7 +554,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(sender, recipient, rFee, tFee);
+        _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -581,7 +566,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(sender, recipient, rFee, tFee);
+        _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -593,7 +578,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(sender, recipient, rFee, tFee);
+        _reflectFee(rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 }
