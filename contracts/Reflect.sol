@@ -34,8 +34,8 @@ contract ETERNITY is Context, IERC20, Ownable {
     uint256 private _tFeeTotal;
 
     // string private _name = "7ETERNITY";
-    string private _name = "GODABEG2";
-    string private _symbol = "GAG2";
+    string private _name = "GODABEG3";
+    string private _symbol = "GAG3";
     uint8 private _decimals = 18;
 
     // TODO SPLIT 
@@ -85,7 +85,6 @@ contract ETERNITY is Context, IERC20, Ownable {
         uint256 tTransferAmount;
         uint256 tFee;
         uint256 tDonation;
-        // uint256 tDonation;
         uint256 tDev;
         uint256 tLiquidity;
     }
@@ -238,7 +237,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(rFee, tFee);
+        _reflectFee(sender, recipient ,rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -286,9 +285,17 @@ contract ETERNITY is Context, IERC20, Ownable {
     // to recieve ETH from uniswapV2Router when swaping
     receive() external payable {}
 
-    function _reflectFee(uint256 rFee, uint256 tFee) private {
-        _rTotal = _rTotal.sub(rFee);
-        _tFeeTotal = _tFeeTotal.add(tFee);
+    function _reflectFee(address sender, address recipient, uint256 rFee, uint256 tFee) private {
+        
+        // sell condition
+         if (sender.isContract() != true && recipient.isContract() != true) {
+            _rTotal = _rTotal.sub(rFee);
+            _tFeeTotal = _tFeeTotal.add(tFee);
+
+        } else {
+            _rTotal = _rTotal.sub(rFee.mul(66).div(10 ** 2));
+            _tFeeTotal = _tFeeTotal.add(tFee.mul(66).div(10 ** 2));
+        }
     }
 
     function _getValues(uint256 tAmount) private view returns (uint256, uint256, uint256, uint256, uint256, uint256, uint256, uint256) {
@@ -352,9 +359,9 @@ contract ETERNITY is Context, IERC20, Ownable {
              _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev);
 
         } else {
-            _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev.mul(40).div(10**2));
+            _rOwned[_devAddress] = _rOwned[_devAddress].add(rDev.mul(60).div(10**2));
             if(_isExcluded[_devAddress])
-            _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev.mul(40).div(10**2));
+            _tOwned[_devAddress] = _tOwned[_devAddress].add(tDev.mul(60).div(10**2));
         }
 
     }
@@ -562,7 +569,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(rFee, tFee);
+        _reflectFee(sender, recipient, rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -574,7 +581,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(rFee, tFee);
+        _reflectFee(sender, recipient, rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 
@@ -586,7 +593,7 @@ contract ETERNITY is Context, IERC20, Ownable {
         _takeLiquidity(tLiquidity);
         _takeDev(sender, recipient, tDev);
         _takeDonation(tDonation);
-        _reflectFee(rFee, tFee);
+        _reflectFee(sender, recipient, rFee, tFee);
         emit Transfer(sender, recipient, tTransferAmount);
     }
 }
