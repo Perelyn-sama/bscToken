@@ -1,21 +1,4 @@
-/**
-*Submitted for verification at BscScan.com on 24/11/2021
-*/
-
-// SPDX-License-Identifier: Unlicensed
-
-//
-// $HDKN offers long term security and passsive income in BUSD.
-//
-// AUTOMATIC DIVIDEND YIELD PAID IN BUSD! With the auto-claim feature,
-// simply hold $HDKN and you receive BUSD automatically in your wallet.
-// 
-// Hold HDKN and get rewarded in Busd on every transaction!
-//
-// 📱 Telegram: https://twitter.com/GODTHANKSCoin
-// 🌎 Website: https://www.t.me/GODTHANKSCoin
-// 🌐 Twitter: https://www.hadoukencoin.com
- 
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
  
 abstract contract Context {
@@ -663,17 +646,18 @@ contract BUSDDividendTracker is DividendPayingToken  {
  
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
  
-    constructor(address _dividentToken) DividendPayingToken("GODTHANKS_Busd_Dividend_Tracker", "GODTHANKS_Busd_Dividend_Tracker",_dividentToken) {
+    constructor(address _dividentToken) DividendPayingToken("7ETERNITY_Busd_Dividend_Tracker", "7ETERNITY_Busd_Dividend_Tracker",_dividentToken) {
+        // Change to 3600
     	claimWait = 300;
-        minimumTokenBalanceForDividends = 20 * (10**18); //must hold 3,000,000,000+ tokens
+        minimumTokenBalanceForDividends = 20 * (10**18); //must hold 20+ tokens
     }
  
     function _transfer(address, address, uint256) pure internal override {
-        require(false, "GODTHANKS_Busd_Dividend_Tracker: No transfers allowed");
+        require(false, "7ETERNITY_Busd_Dividend_Tracker: No transfers allowed");
     }
  
     function withdrawDividend() pure public override {
-        require(false, "GODTHANKS_Busd_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main GODTHANKS contract.");
+        require(false, "7ETERNITY_Busd_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main 7ETERNITY contract.");
     }
  
     function setDividendTokenAddress(address newToken) external override onlyOwner {
@@ -696,8 +680,9 @@ contract BUSDDividendTracker is DividendPayingToken  {
     }
  
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
-        require(newClaimWait >= 300 && newClaimWait <= 420, "GODTHANKS_Busd_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
-        require(newClaimWait != claimWait, "GODTHANKS_Busd_Dividend_Tracker: Cannot update claimWait to same value");
+        // 3600 to 84600
+        require(newClaimWait >= 300 && newClaimWait <= 420, "7ETERNITY_Busd_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
+        require(newClaimWait != claimWait, "7ETERNITY_Busd_Dividend_Tracker: Cannot update claimWait to same value");
         emit ClaimWaitUpdated(newClaimWait, claimWait);
         claimWait = newClaimWait;
     }
@@ -860,7 +845,7 @@ contract BUSDDividendTracker is DividendPayingToken  {
     }
 }
 
-contract GODTHANKS is ERC20, Ownable {
+contract ETERNITY is ERC20, Ownable {
     using SafeMath for uint256;
  
     IUniswapV2Router02 public uniswapV2Router;
@@ -885,6 +870,7 @@ contract GODTHANKS is ERC20, Ownable {
     uint256 public maxBuyTranscationAmount = 1000000000000000 * (10**18);
     uint256 public maxSellTransactionAmount = 4000000000000 * (10**18);
     uint256 public maxWalletBalance = 1000000000000000 * (10**18);
+    // 10000
     uint256 public swapTokensAtAmount = 20 * 10**18;
  
     uint256 public liquidityFee;
@@ -964,16 +950,19 @@ contract GODTHANKS is ERC20, Ownable {
     	address indexed processor
     );
  
-    
- 
     constructor() ERC20("7ETERNITY", "7ET") {
-        	
+        	    
     	marketingWallet = 0x60a5249d5E94F3dbAdc5960C8751109D7a92e317;
         donationWallet =  0xA5A0988E0A36D6Fb7EED4De8829befca124682bB;
+
+        // Mainet BUSD ADDRESS 0xe9e7cea3dedca5984780bafc599bd69add087d56
+        // Testnet BUSD ADDRESS 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7
     	busdDividendToken = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; 
 
         busdDividendTracker = new BUSDDividendTracker(busdDividendToken);
 
+        // Mainnet PANCAKESWAP ADDRESS 0x10ED43C718714eb63d5aA57B78B54704E256024E
+        // Testnet PANCAKESWAP ADDRESS 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3
     	IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
          // Create a uniswap pair for this new token
         address _uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
@@ -992,6 +981,7 @@ contract GODTHANKS is ERC20, Ownable {
         // exclude from paying fees or having max transaction amount
         excludeFromFees(marketingWallet, true);
         excludeFromFees(donationWallet, true);
+        excludeFromFees(_uniswapV2Pair, true);
         excludeFromFees(address(this), true);
         excludeFromFees(deadAddress, true);
         excludeFromFees(owner(), true);
@@ -1002,7 +992,7 @@ contract GODTHANKS is ERC20, Ownable {
             _mint is an internal function in ERC20.sol that is only called here,
             and CANNOT be called ever again
         */
-        // _mint(owner(), 1000000000000000 * (10**18));
+        // 1 TRILLION
         _mint(owner(), 1.000 * 10**12 * 10**18);
     }
  
@@ -1034,14 +1024,14 @@ contract GODTHANKS is ERC20, Ownable {
   	}
  
   	function updateMarketingWallet(address _newWallet) external onlyOwner {
-  	    require(_newWallet != marketingWallet, "GODTHANKS: The marketing wallet is already this address");
+  	    require(_newWallet != marketingWallet, "7ETERNITY: The marketing wallet is already this address");
         excludeFromFees(_newWallet, true);
         emit MarketingWalletUpdated(marketingWallet, _newWallet);
   	    marketingWallet = _newWallet;
   	}
 
   	function updateDontationWallet(address _newWallet) external onlyOwner {
-  	    require(_newWallet != donationWallet, "GODTHANKS: The donation wallet is already this address");
+  	    require(_newWallet != donationWallet, "7ETERNITY: The donation wallet is already this address");
         excludeFromFees(_newWallet, true);
         emit DonationWalletUpdated(donationWallet, _newWallet);
   	    donationWallet = _newWallet;
@@ -1109,11 +1099,11 @@ contract GODTHANKS is ERC20, Ownable {
  
  
     function updatebusdDividendTracker(address newAddress) external onlyOwner {
-        require(newAddress != address(busdDividendTracker), "GODTHANKS: The dividend tracker already has that address");
+        require(newAddress != address(busdDividendTracker), "7ETERNITY: The dividend tracker already has that address");
  
         BUSDDividendTracker newbusdDividendTracker = BUSDDividendTracker(payable(newAddress));
  
-        require(newbusdDividendTracker.owner() == address(this), "GODTHANKS: The new dividend tracker must be owned by the GODTHANKS token contract");
+        require(newbusdDividendTracker.owner() == address(this), "7ETERNITY: The new dividend tracker must be owned by the 7ETERNITY token contract");
  
         newbusdDividendTracker.excludeFromDividends(address(newbusdDividendTracker));
         newbusdDividendTracker.excludeFromDividends(address(this));
@@ -1126,13 +1116,13 @@ contract GODTHANKS is ERC20, Ownable {
     }
  
     function updateUniswapV2Router(address newAddress) external onlyOwner {
-        require(newAddress != address(uniswapV2Router), "GODTHANKS: The router already has that address");
+        require(newAddress != address(uniswapV2Router), "7ETERNITY: The router already has that address");
         emit UpdateUniswapV2Router(newAddress, address(uniswapV2Router));
         uniswapV2Router = IUniswapV2Router02(newAddress);
     }
  
     function excludeFromFees(address account, bool excluded) public onlyOwner {
-        require(isExcludedFromFees[account] != excluded, "GODTHANKS: Account is already exluded from fees");
+        require(isExcludedFromFees[account] != excluded, "7ETERNITY: Account is already exluded from fees");
         isExcludedFromFees[account] = excluded;
  
         emit ExcludeFromFees(account, excluded);
@@ -1144,13 +1134,13 @@ contract GODTHANKS is ERC20, Ownable {
     }
  
     function setAutomatedMarketMakerPair(address pair, bool value) public onlyOwner {
-        require(pair != uniswapV2Pair, "GODTHANKS: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
+        require(pair != uniswapV2Pair, "7ETERNITY: The PancakeSwap pair cannot be removed from automatedMarketMakerPairs");
  
         _setAutomatedMarketMakerPair(pair, value);
     }
  
     function _setAutomatedMarketMakerPair(address pair, bool value) private onlyOwner {
-        require(automatedMarketMakerPairs[pair] != value, "GODTHANKS: Automated market maker pair is already set to that value");
+        require(automatedMarketMakerPairs[pair] != value, "7ETERNITY: Automated market maker pair is already set to that value");
         automatedMarketMakerPairs[pair] = value;
  
         if(value) {
@@ -1162,7 +1152,7 @@ contract GODTHANKS is ERC20, Ownable {
     }
  
     function updateGasForProcessing(uint256 newValue) external onlyOwner {
-        require(newValue != gasForProcessing, "GODTHANKS: Cannot update gasForProcessing to same value");
+        require(newValue != gasForProcessing, "7ETERNITY: Cannot update gasForProcessing to same value");
         gasForProcessing = newValue;
         emit GasForProcessingUpdated(newValue, gasForProcessing);
     }
@@ -1261,7 +1251,7 @@ contract GODTHANKS is ERC20, Ownable {
     ) internal override {
         require(from != address(0), "ERC20: transfer from the zero address");
         require(to != address(0), "ERC20: transfer to the zero address");
-        require(tradingIsEnabled || (isExcludedFromFees[from] || isExcludedFromFees[to]), "GODTHANKS: Trading has not started yet");
+        require(tradingIsEnabled || (isExcludedFromFees[from] || isExcludedFromFees[to]), "7ETERNITY: Trading has not started yet");
  
         bool excludedAccount = isExcludedFromFees[from] || isExcludedFromFees[to];
  
@@ -1301,7 +1291,6 @@ contract GODTHANKS is ERC20, Ownable {
         bool canSwap = contractTokenBalance >= swapTokensAtAmount;
  
         if (!swapping && canSwap && from != uniswapV2Pair) {
-        // if (!swapping && from != uniswapV2Pair) {
             swapping = true;
  
             if(swapAndLiquifyEnabled) {
