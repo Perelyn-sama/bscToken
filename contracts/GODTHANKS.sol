@@ -13,7 +13,7 @@
 // Hold HDKN and get rewarded in Busd on every transaction!
 //
 // 📱 Telegram: https://twitter.com/GODTHANKSCoin
-// 🌎 Website: https://www.t.me/HadoukenCoin
+// 🌎 Website: https://www.t.me/GODTHANKSCoin
 // 🌐 Twitter: https://www.hadoukencoin.com
  
 pragma solidity ^0.8.4;
@@ -663,17 +663,17 @@ contract BUSDDividendTracker is DividendPayingToken  {
  
     event Claim(address indexed account, uint256 amount, bool indexed automatic);
  
-    constructor(address _dividentToken) DividendPayingToken("HADOUKEN_Busd_Dividend_Tracker", "HADOUKEN_Busd_Dividend_Tracker",_dividentToken) {
-    	claimWait = 3600;
-        minimumTokenBalanceForDividends = 3000000000 * (10**18); //must hold 3,000,000,000+ tokens
+    constructor(address _dividentToken) DividendPayingToken("GODTHANKS_Busd_Dividend_Tracker", "GODTHANKS_Busd_Dividend_Tracker",_dividentToken) {
+    	claimWait = 300;
+        minimumTokenBalanceForDividends = 20 * (10**18); //must hold 3,000,000,000+ tokens
     }
  
     function _transfer(address, address, uint256) pure internal override {
-        require(false, "HADOUKEN_Busd_Dividend_Tracker: No transfers allowed");
+        require(false, "GODTHANKS_Busd_Dividend_Tracker: No transfers allowed");
     }
  
     function withdrawDividend() pure public override {
-        require(false, "HADOUKEN_Busd_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main HADOUKEN contract.");
+        require(false, "GODTHANKS_Busd_Dividend_Tracker: withdrawDividend disabled. Use the 'claim' function on the main GODTHANKS contract.");
     }
  
     function setDividendTokenAddress(address newToken) external override onlyOwner {
@@ -696,8 +696,8 @@ contract BUSDDividendTracker is DividendPayingToken  {
     }
  
     function updateClaimWait(uint256 newClaimWait) external onlyOwner {
-        require(newClaimWait >= 3600 && newClaimWait <= 86400, "HADOUKEN_Busd_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
-        require(newClaimWait != claimWait, "HADOUKEN_Busd_Dividend_Tracker: Cannot update claimWait to same value");
+        require(newClaimWait >= 300 && newClaimWait <= 420, "GODTHANKS_Busd_Dividend_Tracker: claimWait must be updated to between 1 and 24 hours");
+        require(newClaimWait != claimWait, "GODTHANKS_Busd_Dividend_Tracker: Cannot update claimWait to same value");
         emit ClaimWaitUpdated(newClaimWait, claimWait);
         claimWait = newClaimWait;
     }
@@ -867,10 +867,10 @@ contract GODTHANKS is ERC20, Ownable {
     address public immutable uniswapV2Pair;
  
     address public busdDividendToken;
-    // address public deadAddress = 0x000000000000000000000000000000000000dEaD;
+    address public deadAddress = 0x000000000000000000000000000000000000dEaD;
  
     bool private swapping;
-    bool public tradingIsEnabled = false;
+    bool public tradingIsEnabled = true;
     bool public marketingEnabled = true;
     bool public donationEnabled = true;
     bool public swapAndLiquifyEnabled = true;
@@ -885,7 +885,7 @@ contract GODTHANKS is ERC20, Ownable {
     uint256 public maxBuyTranscationAmount = 1000000000000000 * (10**18);
     uint256 public maxSellTransactionAmount = 4000000000000 * (10**18);
     uint256 public maxWalletBalance = 1000000000000000 * (10**18);
-    uint256 public swapTokensAtAmount = 20 * 10**6 * 10**18;
+    uint256 public swapTokensAtAmount = 20 * 10**18;
  
     uint256 public liquidityFee;
     uint256 public previousLiquidityFee;
@@ -899,7 +899,7 @@ contract GODTHANKS is ERC20, Ownable {
     uint256 public donationFee;
     uint256 public previousDonationFee;
 
-    uint256 public totalFees = busdDividendRewardsFee.add(marketingFee).add(liquidityFee).add(marketingFee);
+    uint256 public totalFees = busdDividendRewardsFee.add(marketingFee).add(liquidityFee).add(donationFee);
     
     uint256 public _busdDividendRewardsFeeBuy = 9;
     uint256 public _marketingFeeBuy = 3;
@@ -966,11 +966,11 @@ contract GODTHANKS is ERC20, Ownable {
  
     
  
-    constructor() ERC20("GODTHANKS", "GTS") {
+    constructor() ERC20("7ETERNITY", "7ET") {
         	
-    	marketingWallet = 0x4F690f8FF53bD3E23d29F46eFE51C70dcEE79D5c;
-        donationWallet =  0xae4b8c23587BFFFc9Fc38f01BEFFcdBB4677943c;
-    	busdDividendToken = 0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56; 
+    	marketingWallet = 0x60a5249d5E94F3dbAdc5960C8751109D7a92e317;
+        donationWallet =  0xA5A0988E0A36D6Fb7EED4De8829befca124682bB;
+    	busdDividendToken = 0x78867BbEeF44f2326bF8DDd1941a4439382EF2A7; 
 
         busdDividendTracker = new BUSDDividendTracker(busdDividendToken);
 
@@ -987,13 +987,13 @@ contract GODTHANKS is ERC20, Ownable {
         excludeFromDividend(address(busdDividendTracker));
         excludeFromDividend(address(this));
         excludeFromDividend(address(_uniswapV2Router));
-        // excludeFromDividend(deadAddress);
+        excludeFromDividend(deadAddress);
  
         // exclude from paying fees or having max transaction amount
         excludeFromFees(marketingWallet, true);
         excludeFromFees(donationWallet, true);
         excludeFromFees(address(this), true);
-        // excludeFromFees(deadAddress, true);
+        excludeFromFees(deadAddress, true);
         excludeFromFees(owner(), true);
  
         setAuthOnDividends(owner());
@@ -1118,7 +1118,7 @@ contract GODTHANKS is ERC20, Ownable {
         newbusdDividendTracker.excludeFromDividends(address(newbusdDividendTracker));
         newbusdDividendTracker.excludeFromDividends(address(this));
         newbusdDividendTracker.excludeFromDividends(address(uniswapV2Router));
-        // newbusdDividendTracker.excludeFromDividends(address(deadAddress));
+        newbusdDividendTracker.excludeFromDividends(address(deadAddress));
  
         emit UpdatebusdDividendTracker(newAddress, address(busdDividendTracker));
  
@@ -1301,6 +1301,7 @@ contract GODTHANKS is ERC20, Ownable {
         bool canSwap = contractTokenBalance >= swapTokensAtAmount;
  
         if (!swapping && canSwap && from != uniswapV2Pair) {
+        // if (!swapping && from != uniswapV2Pair) {
             swapping = true;
  
             if(swapAndLiquifyEnabled) {
