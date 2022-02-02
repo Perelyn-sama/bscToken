@@ -1,5 +1,5 @@
-# 7eternity-Token
-7eternity is a hyper reflection token which rewards its holders busd and 7eternity as well.
+Token
+token is a hyper reflection token which rewards its holders busd and token as well.
 
 
 
@@ -7,7 +7,7 @@
 
 7% busd rewards
 
-2% 7ETERNITY REFLECTION
+2% token REFLECTION
 
 3 % marketing and dev
 
@@ -20,7 +20,7 @@
 
 7% busd rewards
 
-3% 7ETERNITY REFLECTIONS 
+3% token REFLECTIONS 
 
 2% liquidity 
 
