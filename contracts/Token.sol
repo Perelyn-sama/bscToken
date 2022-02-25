@@ -1,3 +1,4 @@
+// fun fact, this contract does not allow the owner to change the tax percent, lol
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.4;
  
